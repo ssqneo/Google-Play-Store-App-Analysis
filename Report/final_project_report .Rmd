@@ -1,0 +1,131 @@
+---
+title: "Google Play Project Report - CIS 545"
+author: "Gabriella Bongiovanni & Syed Shaheryar Qadir"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+###Google Play Project Report
+####This project aims to prescribe a specific price point at which an app should be priced in order to maximize the number of installs.
+####Two variables from the dataset will be used in this prescription, Price and Installs.
+####Data consists of over 10000 rows and was found on Kaggle.
+```{r}
+# to install package and call the library
+#install.packages("RMySQL")
+library(RMySQL)
+```
+```{r}
+# to connec to the database hosted with the login credentials
+con = dbConnect(MySQL(),
+                user = 'root', password ="",
+                dbname = 'googleplaystore', host = 'localhost')
+```
+
+```{r}
+# to send a query to get all rows from table : 'googleplaystore'
+result = dbSendQuery(con,"SELECT*FROM googleplaystore")
+```
+```{r}
+#to establish a data frame with the retrieved result
+googledata = fetch(result, n = -1)
+#print(googledata)
+```
+
+```{r}
+#tidy data
+library(dplyr)
+clean.googledata = googledata %>% select(Category, Rating, Reviews, Installs, Price)
+
+```
+
+
+####In order to obtain an accurate prescription, first the data will be tidied. The original dataset had several rows in different formats which created difficulties for R to understand the numeric values and instead treated the values as characters rather than numeric.
+
+```{r}
+#clean the data 
+
+``` {r}
+#to specify value type to each column of the dataset
+clean.googledata = na.omit(clean.googledata)
+
+clean.googledata$Category = as.character(clean.googledata$Category)
+clean.googledata$Rating = as.numeric(clean.googledata$Rating)
+clean.googledata$Reviews = as.integer(clean.googledata$Reviews)
+clean.googledata$Installs = as.numeric(clean.googledata$Installs)
+clean.googledata$Price = as.numeric(clean.googledata$Price)
+print(str(clean.googledata))
+
+
+```
+#Once the data is tidied, it will be randomly split by R to create a testing and training set.
+```{r}
+# to define the training and the testing set
+#install.packages("caTools")
+library(caTools)
+set.seed(100)
+split <- sample.split(clean.googledata$Price,SplitRatio = 0.8)
+training_set<- subset(clean.googledata,split==TRUE)
+test_set<- subset(clean.googledata,split==FALSE)
+
+
+```
+
+####To see if a linear model can be used, the correlation between Price and Installs must first be determined. If the correlation is not significant, an alternate method must be used.
+```{r}
+#see if there is a linear correlation between Price of app and Installs
+cor(clean.googledata$Price,clean.googledata$Installs)
+```
+####According to the function, there is no linear correlation. 
+####Below the data can be visualized, and perhaps a trend can be spotted. It is evident from the plot that the highest number of installs happened when the price was lowest. 
+
+```{r}
+model <- glm(Installs ~ Price, data = clean.googledata)
+```
+
+```{r}
+plot(x = clean.googledata$Price, y = clean.googledata$Installs,
+   xlab = "price",
+    ylab = "installs",
+     main = "installs vs price",
+   abline(model)
+) 
+```
+####Since the inear model is not signifcant, next a non linear model will be attempted. 
+####Below is the code for a non-linear least squares model.
+```{r}
+m2<-nls(Installs ~ Price*a + b, data = clean.googledata, start = c(a=0,b=0))
+```
+```{r}
+summary(m2)
+```
+####This model proved much more successful and the p-value is less than 0.05.
+####Due to this model's accuracy, it will be used to predict the number of installs if a company was to start selling an app and priced it at a certain point.
+```{r}
+#set target to obtain prediction
+target = data.frame(Price = 0)
+result = predict(m2,target)
+cat("Number of installs if priced at $0:", result)
+```
+
+```{r}
+target = data.frame(Price = 0.5)
+result = predict(m2,target)
+cat("Number of installs if priced at $0.50:", result)
+```
+
+
+```{r}
+target = data.frame(Price = 1)
+result = predict(m2,target)
+cat("Number of installs if priced at $1:", result)
+```
+
+```{r}
+target = data.frame(Price = 10)
+result = predict(m2,target)
+cat("Number of installs if priced at $10:", result)
+```
+####As proven in this predictive model, the higher an app is priced, the number of installs will be negatively affected.
+####If a company's goal is to maximize the number installs, the prescribed price according to this model is $0.

@@ -1,0 +1,178 @@
+---
+title: "Google Play Project"
+author: "Gabriella Bongiovanni & Syed Shaheryar Qadir"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+#Gabriella Bongiovanni
+#Syed Shaheryar Qadir
+#Graduate Students - Big Data Analytics
+#St. Thomas University Class of 2020
+#Date: 03/03/2019
+#CIS-545-11 Spring 2019
+#Final Project
+`
+```{r}
+# to install package and call the library
+#install.packages("RMySQL")
+library(RMySQL)
+```
+```{r}
+# to connec to the database hosted with the login credentials
+con = dbConnect(MySQL(),
+                user = 'root', password ="",
+                dbname = 'googleplaystore', host = 'localhost')
+```
+
+```{r}
+# to send a query to get all rows from table : 'googleplaystore'
+result = dbSendQuery(con,"SELECT*FROM googleplaystore")
+```
+```{r}
+#to establish a data frame with the retrieved result
+googledata = fetch(result, n = -1)
+#print(googledata)
+```
+
+```{r}
+#clean the data 
+#tidy data
+library(dplyr)
+clean.googledata = googledata %>% select(Category, Rating, Reviews, Installs, Price)
+
+```
+```{r}
+#to specify value type to each column of the dataset
+clean.googledata = na.omit(clean.googledata)
+
+clean.googledata$Category = as.character(clean.googledata$Category)
+clean.googledata$Rating = as.numeric(clean.googledata$Rating)
+clean.googledata$Reviews = as.integer(clean.googledata$Reviews)
+clean.googledata$Installs = as.numeric(clean.googledata$Installs)
+clean.googledata$Price = as.numeric(clean.googledata$Price)
+print(str(clean.googledata))
+
+
+```
+```{r}
+#see if there is a linear correlation between Price of app and Installs
+cor(clean.googledata$Price,clean.googledata$Installs)
+```
+
+```{r}
+# to define the training and the testing set
+#install.packages("caTools")
+library(caTools)
+set.seed(100)
+split <- sample.split(clean.googledata$Price,SplitRatio = 0.8)
+training_set<- subset(clean.googledata,split==TRUE)
+test_set<- subset(clean.googledata,split==FALSE)
+
+
+```
+
+```{r}
+
+# to create the logistic regression model
+#glm = y ~ x
+model <- glm(Installs ~ Price, data = training_set)
+print(model)
+
+
+```
+```{r}
+# to plot the Installs vs Price
+library(ggplot2)
+head(clean.googledata)
+ggplot( clean.googledata, aes(x=clean.googledata$Price , y=clean.googledata$Installs, color=clean.googledata$Installs)) + geom_point(size=5) + 
+  ggtitle("Installs vs Price")+
+  labs(y = "Installs", x = "Price")+
+   theme(plot.title = element_text(hjust = 0.5))+
+  scale_color_gradientn(colours = terrain.colors(7))
+```
+```{r}
+
+plot(x = clean.googledata$Price, y = clean.googledata$Installs,
+   xlab = "Price",
+    ylab = "Installs",
+     main = "Installs vs Price",
+   abline(model)
+) 
+```
+```{r}
+table(x = clean.googledata$Price, y = clean.googledata$Installs)
+```
+
+
+
+```{r echo=FALSE, results='asis'}
+#to create table in markdown
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+dt <-  clean.googledata
+dt %>% 
+  kable() %>%
+  kable_styling()
+```
+
+```{r}
+#Linear model is not signifcant, therefore create non linear model
+m2<-nls(Installs ~ Price*a + b, data = clean.googledata, start = c(a=0,b=0))
+print(m2)
+
+```
+```{r}
+summary(m2)
+```
+
+```{r}
+#plot the graph
+plot(x = clean.googledata$Price, y = clean.googledata$Installs,
+   xlab = "Price",
+    ylab = "Installs",
+     main = "Installs vs Price",
+   abline(m2)
+) 
+```
+
+```{r}
+#set target to obtain prediction
+target = data.frame(Price = 0)
+result = predict(m2,target)
+cat("Number of installs if priced at $0:", result)
+```
+
+ 
+ 
+ 
+```{r}
+#set target to obtain prediction
+target = data.frame(Price = 0.5)
+result = predict(m2,target)
+cat("Number of installs if priced at $0.50:", result)
+```
+
+
+```{r}
+#set target to obtain prediction
+target = data.frame(Price = 10)
+result = predict(m2,target)
+cat("Number of installs if priced at $10:", result)
+```
+
+```{r}
+#set target to obtain prediction
+target = data.frame(Price = 0.25)
+result = predict(m2,target)
+cat("Number of installs if priced at $0.25:", result)
+```
+
+```{r}
+#Evident that the optimal price point is $0
+```
+

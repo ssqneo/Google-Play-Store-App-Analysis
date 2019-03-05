@@ -1,0 +1,88 @@
+---
+title: "Google PlayStore App Analysis"
+author: "Gabriella Bongiovanni & Syed Shaheryar Qadir"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+-Problem Statement:
+  
+Based on past trends what price tier should an app be placed in, to maximize its number of installs?
+
+-Project Objective
+  
+  The objective is to gain a better understanding of the trend an app follows to prescribe a specific price point at which an app should be priced in order to maximize the number of installs.
+
+-Purpose and Motivation
+
+  Today, apps are almost essential to everyday living. An average of 2.6 billion people own smart phones. In 2012, 35.4 percent of Black Friday sales last year were completed on mobile devices. (2012 IBM Holiday Benchmark Reports) Imagine today! Companies who invest in apps are able to connect better with customers, create a more simplified web-based customer experience, allowing for increased profit. Monetization and sales would serve as motivation for us.
+
+-Independent Variables
+  
+  -Price 
+  
+    1.	Describes the cost of an app
+    2.  Numeric data type
+ 
+    
+-Dependent Variables
+  
+  -Installs
+    1.	Describes the amount of times each app has been downloaded
+    2.	Numeric data type
+
+  
+-Graphs
+
+![plot](/Visuals/plot.png)
+![ggplot](/Visuals/ggplot.png)
+![plot_prescribe](/Visuals/plot_prescribe.png)
+![table](/Visuals/table.png)
+![table2](/Visuals/table2.png)
+![summary](/Visuals/summary.png)
+
+
+-Methodolgy
+  
+  We divided the project into two phases; phase-I and phase-II. Phase-I consists of acquiring, cleaning and importing the dataset from our data warehouse, whereas Phase-II reflects the modeling, visualization and set target to obtain prediction. 
+  
+-Phase - I
+  
+  -Acquiring and Cleaning Data
+    In this step we got the data from        https://www.kaggle.com/lava18/google-play-store-apps. We imported all of it to our data warehouse and then connected to R.
+    
+  
+  -Tidying Procedure
+    Rows with n/a were deleted and only olny columns with price and installs were kept.
+    
+-Phase - II
+
+  
+  -Modeling with Nonlinear least square regression model
+    
+  We will be using nonlinear least square regression model to map the trend visible for the current installs and price.
+  
+  -Visualizing the Data
+  
+   Here we analyzed our dataset with a mix of install and pricing columns. We can            visualize the data for our numerical columns and see what the distribution looks        like.
+   
+
+-Conclusion
+  
+  By applying nonlinear least square regression model,   we are able to improve the explainability of our modelling and draw an actionable conclusion.   As proven in this predictive model, the higher an app is priced, the number of installs will be negatively affected.If a company's goal is to maximize the number installs, the prescribed price according to this model is $0.
+
+-Refrences
+
+1.	Lavanya Gupta. (2019, February 3). Google Play Store Apps. [Kaggle Post]. Retrieved from https://www.kaggle.com/lava18/google-play-store-apps
+
+2.	Viswanathan, P. (2011, December 13). Mobile app development trends for 2012. About.com Mobile Devices. Retrieved March 16, 2012, from http://mobiledevices.about.com/od/kindattentiondevelopers/tp/Mobile-AppDevelopment-Trends-For-2012.htm
+
+3.	Racoma, J. A. (2011, June 30). Mobile app market US$36.7b industry by 2015 with 182.7b downloads; but is more better? CMSWire.com. Retrieved February 12, 2012, from http://www.cmswire.com/cms/mobile/mobile-app-market-us367b-industry-by-2015-with1827b-downloads-but-is-more-better-011867.php
+
+4.	Google/IPSOS, & OTX MediaCT. (2011, April). The mobile movement. Think with Google. Retrieved from http://www.thinkwithgoogle.com/insights/library/studies/the-mobilemovement/
+
+5.	Thomas L. Rakestraw. (2013). The mobile app industry: a case study. Retrieved from https://pdfs.semanticscholar.org/b4fd/972d8f34de5d8c5eeec805b94642b1610223.pdf
+
+
